@@ -74,12 +74,13 @@ def get_list_of_available_yeezys():
 
     if "productIds" in yeezy_data:
         for productId in yeezy_data["productIds"]:
+            print("<p>")
             print(
                 f"<h2>{yeezy_data['productData'][productId]['localized']['productName']}</h2>"
             )
             for image in yeezy_data["productData"][productId]["shared"]["imageUrls"]:
                 print(f"<img src='{image}'>")
-            print("<p>")
+                print("<br>")
             print(
                 f"Color: {yeezy_data['productData'][productId]['localized']['color']}<br>"
             )
