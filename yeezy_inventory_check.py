@@ -2,7 +2,9 @@ from bs4 import BeautifulSoup
 import requests
 import json
 import smtplib
-from email.message import Message
+import ssl
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import argparse
 import sys
 from configparser import ConfigParser
@@ -16,11 +18,40 @@ headers = {
 shoes = {}
 
 
-def get_productIds():
+def get(url):
     """
-    Get the product Ids from Adidas website
+    Perfoms HTTP GET request
     """
-    pass
+    data = requests.get(url, headers=headers)
+    try:
+        data.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        if data.status_code == 404:
+            pass
+        else:
+            print(e)
+    except requests.exceptions.RequestException as e:
+        print(e)
+
+    return data
+
+
+def get_yeezy_sizes(url):
+    shoe_sizes = []
+    data = get(url)
+    if data.status_code == 404:
+        print("No sizes are available.")
+        return False
+    data = data.json()
+    if data["availability_status"] == "PREVIEW":
+        print("Only available on the Confirm App")
+        return False
+    for size_data in data["variation_list"]:
+        if size_data["availability_status"] == "IN_STOCK":
+            shoe_sizes.append(size_data["size"])
+
+    print(f"Available Sizes: {', '.join(shoe_sizes)}<br>")
+    return True
 
 
 def get_list_of_available_yeezys():
@@ -33,7 +64,7 @@ def get_list_of_available_yeezys():
     while yeezy_data == None:
         try:
 
-            html_data = requests.get(url, headers=headers)
+            html_data = get(url)
             soup = BeautifulSoup(html_data.text, "html.parser")
             yeezy_data = json.loads(
                 "".join(soup.find("script").strings).split("=", 1)[1]
@@ -43,26 +74,28 @@ def get_list_of_available_yeezys():
 
     if "productIds" in yeezy_data:
         for productId in yeezy_data["productIds"]:
-            html_data = requests.get(
-                f"https://www.adidas.com/api/products/{productId}/availability",
-                headers=headers,
-            )
-            print(yeezy_data["productData"][productId]["localized"]["productName"])
             print(
-                f"Color: {yeezy_data['productData'][productId]['localized']['color']}"
+                f"<h2>{yeezy_data['productData'][productId]['localized']['productName']}</h2>"
             )
+            for image in yeezy_data["productData"][productId]["shared"]["imageUrls"]:
+                print(f"<img src='{image}'>")
+            print("<p>")
             print(
-                f"Release date: {yeezy_data['productData'][productId]['localized']['comingSoonFromDate']}"
+                f"Color: {yeezy_data['productData'][productId]['localized']['color']}<br>"
             )
             print(
-                f"Stop date: {yeezy_data['productData'][productId]['localized']['onlineToDate']}"
+                f"Release Date: {yeezy_data['productData'][productId]['localized']['releaseDate']}<br>"
             )
             print(
-                f"Price: {yeezy_data['productData'][productId]['localized']['priceFormatted']}"
+                f"Stop Date: {yeezy_data['productData'][productId]['localized']['onlineToDate']}<br>"
             )
-            print(html_data.json())
-            print(html_data.url)
-            print("\n")
+            print(
+                f"Price: {yeezy_data['productData'][productId]['localized']['priceFormatted']}<br>"
+            )
+            get_yeezy_sizes(
+                f"https://www.adidas.com/api/products/{productId}/availability"
+            )
+            print("</p>")
 
 
 class LogFile:
@@ -101,26 +134,22 @@ def email_logfile(filename, email=None, password=None, recipient=None):
             )
             return None
     try:
-        with open(filename, "rb") as f:
+        with open(filename, "r") as f:
             logs = f.read()
     except:
-        with open("logfile.log", "rb") as f:
+        with open("logfile.log", "r") as f:
             logs = f.read()
 
-    message = Message()
-    message.set_payload(logs)
-    subject = "Daily Yeezy Availability Listing"
-    try:
-        session = smtplib.SMTP("smtp.gmail.com", 587)
-        session.ehlo()
-        session.starttls()
-        session.ehlo()
-        session.login(email, password)
-        data = f"Subject: {subject} \n {message}"
-        session.sendmail(email, recipient, data)
-        session.quit()
-    except Exception as e:
-        print(e)
+    message = MIMEMultipart()
+    message["From"] = email
+    message["To"] = recipient
+    message["Subject"] = "Daily Yeezy Availability Listing"
+    message.attach(MIMEText(logs, "html"))
+    message = message.as_string()
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+        server.login(email, password)
+        server.sendmail(email, recipient, message)
 
 
 def main():
@@ -158,7 +187,11 @@ def main():
     logfilepath = "logfile.log"
 
     with LogFile(None):
+        print("<html>")
+        print("<body>")
         get_list_of_available_yeezys()
+        print("</body>")
+        print("</html>")
 
     if (
         type(args.email) == list
