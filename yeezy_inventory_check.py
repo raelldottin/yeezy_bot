@@ -70,7 +70,7 @@ def get_list_of_available_yeezys():
                 "".join(soup.find("script").strings).split("=", 1)[1]
             )
         except Exception as e:
-            print(e)
+            pass
 
     if "productIds" in yeezy_data:
         for productId in yeezy_data["productIds"]:
