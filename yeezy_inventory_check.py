@@ -50,7 +50,7 @@ def get_yeezy_sizes(url):
         if size_data["availability_status"] == "IN_STOCK":
             shoe_sizes.append(size_data["size"])
 
-    print(f"Available Sizes: {', '.join(shoe_sizes)}<br>")
+    print(f"Available Sizes: {', '.join(shoe_sizes)}.<br>")
     return True
 
 
