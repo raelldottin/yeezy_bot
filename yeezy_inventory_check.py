@@ -40,11 +40,11 @@ def get_yeezy_sizes(url):
     shoe_sizes = []
     data = get(url)
     if data.status_code == 404:
-        print("No sizes are available.")
+        print("No sizes are available.<br>")
         return False
     data = data.json()
     if data["availability_status"] == "PREVIEW":
-        print("Only available on the Confirm App")
+        print("Only available on the Confirm App.<br>")
         return False
     for size_data in data["variation_list"]:
         if size_data["availability_status"] == "IN_STOCK":
@@ -78,9 +78,6 @@ def get_list_of_available_yeezys():
             print(
                 f"<h2>{yeezy_data['productData'][productId]['localized']['productName']}</h2>"
             )
-            for image in yeezy_data["productData"][productId]["shared"]["imageUrls"]:
-                print(f"<img src='{image}'>")
-                print("<br>")
             print(
                 f"Color: {yeezy_data['productData'][productId]['localized']['color']}<br>"
             )
@@ -96,6 +93,9 @@ def get_list_of_available_yeezys():
             get_yeezy_sizes(
                 f"https://www.adidas.com/api/products/{productId}/availability"
             )
+            for image in yeezy_data["productData"][productId]["shared"]["imageUrls"]:
+                print(f"<img src='{image}'>")
+                print("<br>")
             print("</p>")
 
 
