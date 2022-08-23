@@ -46,12 +46,17 @@ def get_yeezy_sizes(url):
     if data["availability_status"] == "PREVIEW":
         print("Only available on the Confirm App.<br>")
         return False
+
     for size_data in data["variation_list"]:
         if size_data["availability_status"] == "IN_STOCK":
             shoe_sizes.append(size_data["size"])
 
-    print(f"Available Sizes: {', '.join(shoe_sizes)}.<br>")
-    return True
+    if len(size_data) < 1:
+        print("No sizes are available.<br>")
+        return False
+    else:
+        print(f"Available Sizes: {', '.join(shoe_sizes)}.<br>")
+        return True
 
 
 def get_list_of_available_yeezys():
