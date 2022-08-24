@@ -51,7 +51,7 @@ def get_yeezy_sizes(url):
         if size_data["availability_status"] == "IN_STOCK":
             shoe_sizes.append(size_data["size"])
 
-    if len(size_data) < 1:
+    if len(shoe_sizes) < 1:
         print("No sizes are available.<br>")
         return False
     else:
