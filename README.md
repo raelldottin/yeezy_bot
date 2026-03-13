@@ -1,6 +1,6 @@
 # Sneaker Launchpad
 
-Sneaker Launchpad turns the original `yeezy_bot` repository into a broader sneaker launch dashboard for Nike and Adidas. It provides:
+Sneaker Launchpad is a sneaker launch dashboard for Nike and Adidas. It provides:
 
 - A FastAPI frontend for browsing upcoming sneakers and selecting which pair to target.
 - A local SQLite-backed purchase history.
@@ -12,14 +12,14 @@ Recommended GitHub repo rename: `sneaker-launchpad`
 
 ## Why the rename
 
-The original repo was narrowly scoped to Adidas Yeezy inventory checks. The new project covers:
+The previous repository name no longer matches the project. The new project covers:
 
 - Multiple stores
 - Upcoming release tracking
 - Purchase selection and automation orchestration
 - Purchase history and operational visibility
 
-`yeezy_bot` no longer describes the product surface, so the internal project name is now **Sneaker Launchpad**.
+The product surface is now broader, so the project name is **Sneaker Launchpad**.
 
 ## Architecture at a glance
 
