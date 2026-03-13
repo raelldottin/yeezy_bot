@@ -40,7 +40,7 @@ class StaticAutomator:
 def _settings(database_path: Path) -> AppSettings:
     return AppSettings(
         project_name="Sneaker Launchpad",
-        recommended_repo_name="sneaker-launchpad",
+        repository_name="sneaker-launchpad",
         database_path=database_path,
         http_timeout_seconds=10,
         automation_timeout_seconds=5000,

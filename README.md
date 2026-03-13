@@ -8,7 +8,7 @@ Sneaker Launchpad is a sneaker launch dashboard for Nike and Adidas. It provides
 - Browser automation hooks for Nike and Adidas using persistent Chromium profiles.
 - Unit and integration tests built around domain services and adapter seams.
 
-Recommended GitHub repo rename: `sneaker-launchpad`
+GitHub repo name: `sneaker-launchpad`
 
 ## Why the rename
 

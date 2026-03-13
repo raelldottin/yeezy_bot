@@ -23,7 +23,7 @@ class StoreAutomationConfig:
 @dataclass(frozen=True, slots=True)
 class AppSettings:
     project_name: str
-    recommended_repo_name: str
+    repository_name: str
     database_path: Path
     http_timeout_seconds: float
     automation_timeout_seconds: float
@@ -38,7 +38,7 @@ def load_settings(base_dir: Path | None = None) -> AppSettings:
     default_headless = _env_flag("SNEAKER_LAUNCHPAD_HEADLESS", True)
     return AppSettings(
         project_name="Sneaker Launchpad",
-        recommended_repo_name="sneaker-launchpad",
+        repository_name="sneaker-launchpad",
         database_path=Path(
             os.getenv(
                 "SNEAKER_LAUNCHPAD_DB",
