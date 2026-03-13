@@ -1,0 +1,57 @@
+[build-system]
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sneaker-launchpad"
+version = "0.1.0"
+description = "A multi-store sneaker launch dashboard with Nike and Adidas purchase orchestration."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [
+  { name = "Rael Dottin" }
+]
+dependencies = [
+  "beautifulsoup4>=4.12.3",
+  "fastapi>=0.116.1",
+  "httpx>=0.28.1",
+  "jinja2>=3.1.6",
+  "playwright>=1.54.0",
+  "python-multipart>=0.0.20",
+  "uvicorn>=0.35.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pyright>=1.1.401",
+  "pytest>=8.4.1",
+  "ruff>=0.12.10",
+]
+
+[project.scripts]
+sneaker-launchpad = "sneaker_launchpad.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sneaker_launchpad"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+markers = [
+  "integration: exercises the app through real adapters such as sqlite and http routing",
+]
+testpaths = [
+  "tests",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N", "S", "ARG"]
+ignore = ["S101"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["ARG001"]
+"src/sneaker_launchpad/automation.py" = ["S112"]

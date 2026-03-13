@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="panel provider-panel">
+  <div class="panel-heading">
+    <h2>Store Health</h2>
+    <p>Live refresh status for each storefront and how much data is cached locally.</p>
+  </div>
+  <div class="provider-grid">
+    {% for snapshot in snapshots %}
+    <article class="provider-card">
+      <div class="provider-card-top">
+        <span class="provider-pill provider-{{ snapshot.provider }}">{{ snapshot.provider }}</span>
+        <span class="provider-status {% if snapshot.live_fetch_succeeded %}ok{% else %}warn{% endif %}">
+          {% if snapshot.live_fetch_succeeded %}Live{% else %}Cached{% endif %}
+        </span>
+      </div>
+      <h3>{{ snapshot.count }} release(s)</h3>
+      <p>{{ snapshot.status_message }}</p>
+      <small>Updated {{ snapshot.fetched_at }}</small>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="dashboard-grid">
+  <section class="panel releases-panel">
+    <div class="panel-heading">
+      <h2>Upcoming Sneakers</h2>
+      <p>Select a release card to pre-fill the purchase form.</p>
+    </div>
+    <div class="filters" role="toolbar" aria-label="Release filters">
+      <button type="button" class="filter-button is-active" data-filter="all">All</button>
+      <button type="button" class="filter-button" data-filter="nike">Nike</button>
+      <button type="button" class="filter-button" data-filter="adidas">Adidas</button>
+    </div>
+    <div class="release-grid">
+      {% for release in releases %}
+      <article class="release-card" data-provider="{{ release.provider }}">
+        <div class="release-image-wrap">
+          {% if release.image_url %}
+          <img class="release-image" src="{{ release.image_url }}" alt="{{ release.name }}" />
+          {% else %}
+          <div class="release-image placeholder">No image</div>
+          {% endif %}
+          <span class="provider-pill provider-{{ release.provider }}">{{ release.provider }}</span>
+        </div>
+        <div class="release-body">
+          <h3>{{ release.name }}</h3>
+          <p class="release-subtitle">{{ release.subtitle }}</p>
+          <dl class="release-meta">
+            <div>
+              <dt>Launch</dt>
+              <dd>{{ release.release_at }}</dd>
+            </div>
+            <div>
+              <dt>Price</dt>
+              <dd>{{ release.price }}</dd>
+            </div>
+            <div>
+              <dt>Style</dt>
+              <dd>{{ release.style_code }}</dd>
+            </div>
+            <div>
+              <dt>Sizes</dt>
+              <dd>{{ release.sizes }}</dd>
+            </div>
+          </dl>
+          <div class="card-actions">
+            <button
+              type="button"
+              class="select-release secondary-button"
+              data-provider="{{ release.provider }}"
+              data-release-id="{{ release.id }}"
+              data-release-name="{{ release.name }}"
+              data-product-url="{{ release.product_url }}"
+            >
+              Select For Purchase
+            </button>
+            <a class="inline-link" href="{{ release.product_url }}" target="_blank" rel="noreferrer">
+              Open Store Page
+            </a>
+          </div>
+        </div>
+      </article>
+      {% else %}
+      <article class="empty-state">
+        <h3>No releases cached yet</h3>
+        <p>Use the refresh button above to pull the current launch catalog.</p>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="panel purchase-panel">
+    <div class="panel-heading">
+      <h2>Purchase Selection</h2>
+      <p>
+        Pick a release card or provide a manual Nike or Adidas product URL. Browser
+        automation uses persistent profiles so you can keep store logins and saved
+        payment methods outside the app.
+      </p>
+    </div>
+    <div class="selected-release-banner" id="selected-release-banner">
+      No release selected yet. Manual URLs still work.
+    </div>
+    <form class="purchase-form" action="/purchases" method="post">
+      <input id="release-id-input" type="hidden" name="release_id" value="" />
+      <label>
+        Store
+        <select id="provider-input" name="provider" required>
+          <option value="nike">Nike</option>
+          <option value="adidas">Adidas</option>
+        </select>
+      </label>
+      <label>
+        Target Size
+        <input name="size" type="text" placeholder="10.5" required />
+      </label>
+      <label>
+        Manual Product Name
+        <input id="manual-name-input" name="manual_name" type="text" placeholder="Optional manual target" />
+      </label>
+      <label>
+        Manual Product URL
+        <input
+          id="manual-url-input"
+          name="manual_url"
+          type="url"
+          placeholder="https://www.nike.com/..."
+        />
+      </label>
+      <label class="checkbox-field">
+        <input name="auto_submit" type="checkbox" value="true" checked />
+        Run browser automation immediately
+      </label>
+      <button class="primary-button" type="submit">Save Purchase Request</button>
+    </form>
+    <div class="automation-note">
+      <strong>Profiles:</strong> set
+      <code>SNEAKER_LAUNCHPAD_NIKE_PROFILE_DIR</code> and
+      <code>SNEAKER_LAUNCHPAD_ADIDAS_PROFILE_DIR</code> to persistent Chromium
+      directories. Enable <code>SNEAKER_LAUNCHPAD_FINALIZE_PURCHASE=true</code> only
+      if you want the automation to attempt the last checkout click.
+    </div>
+  </section>
+</section>
+
+<section class="panel history-panel">
+  <div class="panel-heading">
+    <h2>Purchase History</h2>
+    <p>Every purchase request is stored locally so you can review outcomes and rerun targets.</p>
+  </div>
+  <div class="history-table-wrap">
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th>Submitted</th>
+          <th>Store</th>
+          <th>Release</th>
+          <th>Size</th>
+          <th>Status</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for purchase in purchases %}
+        <tr>
+          <td>{{ purchase.submitted_at }}</td>
+          <td><span class="provider-pill provider-{{ purchase.provider }}">{{ purchase.provider }}</span></td>
+          <td>
+            <a href="{{ purchase.product_url }}" target="_blank" rel="noreferrer">
+              {{ purchase.release_name }}
+            </a>
+          </td>
+          <td>{{ purchase.size }}</td>
+          <td><span class="status-chip status-{{ purchase.status }}">{{ purchase.status }}</span></td>
+          <td>{{ purchase.result_message }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6">No purchase requests yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

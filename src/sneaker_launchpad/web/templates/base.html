@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ settings.project_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}" />
+    <script defer src="{{ url_for('static', path='app.js') }}"></script>
+  </head>
+  <body>
+    <div class="backdrop"></div>
+    <main class="shell">
+      <header class="hero">
+        <p class="eyebrow">Formerly yeezy_bot</p>
+        <div class="hero-copy">
+          <h1>{{ settings.project_name }}</h1>
+          <p>
+            A Nike and Adidas launch dashboard for tracking upcoming sneakers,
+            selecting target pairs, and recording every automation run.
+          </p>
+        </div>
+        <div class="hero-actions">
+          <form action="/refresh" method="post">
+            <button class="primary-button" type="submit">Refresh Catalog</button>
+          </form>
+          <a class="ghost-button" href="/api/releases">JSON Feed</a>
+        </div>
+      </header>
+
+      {% if notice %}
+      <section class="notice notice-{{ notice_level }}">{{ notice }}</section>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>
